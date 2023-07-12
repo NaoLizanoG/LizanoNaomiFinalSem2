@@ -102,13 +102,31 @@ void mostrarDatos(char *archivo, int posicion)
     fclose(archivoP);
 }
 
-void reemplazarDatos (char *archivo, int posicion){
-
-
+void reemplazarDatos(char *archivo, int posicion, struct paciente nuevo)
+{
+    char codigo[20], apellido[50], nombre[50], timestamp[128];
+    int edad;
+    float altura, peso, presion;
+    time_t tiempo = time(0);
+    struct tm *tlocal = localtime(&tiempo);
+    char output[128];
+    FILE *archivoP;
+    archivoP = fopen(archivo, "r+");
+    if (archivoP == NULL)
+    {
+        printf("No se pudo abrir el archivo.\n");
+        return;
+    }
+    else
+    {
+        strftime(output, 128, "%d/%m/%y %H:%M:%S", tlocal);
+        fseek(archivoP, posicion, 0);
+        fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%127[^\n]\n", codigo, apellido, nombre, &edad, &altura, &peso, &presion, timestamp);
+        fseek(archivoP, posicion, 0);
+        fprintf(archivoP, "%s;%s;%s;%d;%.2f;%.2f;%.2f;%s", nuevo.codigo, nuevo.apellido, nuevo.nombre, nuevo.edad, nuevo.altura, nuevo.peso, nuevo.presion, output);
+    }
+    fclose(archivoP);
 }
-
-
-
 
 int main()
 {
@@ -184,13 +202,36 @@ int main()
                     puts("2. Buscar otro paciente");
                     puts("3. Editar datos de paciente");
                     scanf("%d", &menu2);
-                   if (menu2==3)
-                   {
-                    /* code */
-                   }
-                   
+                    if (menu2 == 3)
+                    {
+                        puts("Ingrese los nuevos datos:\n");
+                        puts("\nCodigo de paciente");
+                        scanf("%s", nuevo.codigo);
+                        puts("\nApellido:");
+                        scanf("%s", nuevo.apellido);
+                        fflush(stdin);
+                        puts("\nNombre:");
+                        scanf("%s", nuevo.nombre);
+                        fflush(stdin);
+                        puts("\nEdad:");
+                        scanf("%d", &nuevo.edad);
+                        fflush(stdin);
+                        puts("\nAltura:");
+                        scanf("%f", &nuevo.altura);
+                        fflush(stdin);
+                        puts("\nPeso:");
+                        scanf("%f", &nuevo.peso);
+                        fflush(stdin);
+                        puts("\nPresion:");
+                        scanf(" %f", &nuevo.presion);
+                        fflush(stdin);
+                        puts("\nDatos guardados\n");
+
+                        reemplazarDatos(nombreArchivo, posicion, nuevo);
+                    }
+
                 } while (menu2 == 3);
-            } while (menu2==2);
+            } while (menu2 == 2);
 
             break;
         case 3:
