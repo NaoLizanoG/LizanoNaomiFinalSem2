@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string.h>
 
+// estructura para almacenar los datos de los pacientes
 struct paciente
 {
     char codigo[50];
@@ -14,6 +15,7 @@ struct paciente
     float presion;
 };
 
+// funcion para ingresar los datos de nuevos pacientes
 void ingresoDatos(char *archivo, struct paciente nuevo)
 {
     time_t tiempo = time(0);
@@ -34,6 +36,7 @@ void ingresoDatos(char *archivo, struct paciente nuevo)
     fclose(archivoP);
 }
 
+// funciona para encontrar los datos mediante el codigo del paciente
 int encontrarDatos(char *archivo, char *codigo)
 {
     int posicion = -1;
@@ -71,6 +74,7 @@ int encontrarDatos(char *archivo, char *codigo)
     return posicion;
 }
 
+// funcion para mostrar los datos encontrados en la funcion anterior
 void mostrarDatos(char *archivo, int posicion)
 {
     if (posicion == -1)
@@ -98,10 +102,18 @@ void mostrarDatos(char *archivo, int posicion)
     fclose(archivoP);
 }
 
+void reemplazarDatos (char *archivo, int posicion){
+
+
+}
+
+
+
+
 int main()
 {
     char codigo[50];
-    int menu, menu1, posicion;
+    int menu, menu1, menu2, posicion;
     struct paciente nuevo;
     char nombreArchivo[40] = "Registros medicos.txt";
 
@@ -121,6 +133,7 @@ int main()
         case 1:
             do
             {
+                puts("\nPor favor, ingrese los datos sin espacios al inicio o al final");
                 puts("\nCodigo de paciente");
                 scanf("%s", nuevo.codigo);
                 puts("\nApellido:");
@@ -157,13 +170,30 @@ int main()
             } while (menu1 == 1);
             break;
         case 2:
-            printf("Ingrese el codigo del paciente que desea encontrar\n");
-            scanf("%s", codigo);
-            posicion = encontrarDatos(nombreArchivo, codigo);
-            mostrarDatos(nombreArchivo, posicion);
+            do
+            {
+                printf("Ingrese el codigo del paciente que desea encontrar\n");
+                scanf("%s", codigo);
+                posicion = encontrarDatos(nombreArchivo, codigo);
+                mostrarDatos(nombreArchivo, posicion);
+                puts("\n");
+                do
+                {
+                    puts("Que desea hacer a continuacion:\n");
+                    puts("1. Regresar al menu principal");
+                    puts("2. Buscar otro paciente");
+                    puts("3. Editar datos de paciente");
+                    scanf("%d", &menu2);
+                   if (menu2==3)
+                   {
+                    /* code */
+                   }
+                   
+                } while (menu2 == 3);
+            } while (menu2==2);
+
             break;
         case 3:
-            /* code */
             break;
         default:
             printf("Lo siento, esa no es una opcion\n");
