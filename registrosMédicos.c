@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <math.h>
 
 // estructura para almacenar los datos de los pacientes
 struct paciente
@@ -13,6 +14,7 @@ struct paciente
     float altura;
     float peso;
     float presion;
+    float IMC;
 };
 
 // funcion para ingresar los datos de nuevos pacientes
@@ -31,7 +33,7 @@ void ingresoDatos(char *archivo, struct paciente nuevo)
     else
     {
         strftime(output, 128, "%d/%m/%y %H:%M:%S", tlocal);
-        fprintf(archivoP, "%s;%s;%s;%d;%.2f;%.2f;%.2f;%s\n", nuevo.codigo, nuevo.apellido, nuevo.nombre, nuevo.edad, nuevo.altura, nuevo.peso, nuevo.presion, output);
+        fprintf(archivoP, "%s;%s;%s;%d;%.2f;%.2f;%.2f;%.2f;%s\n", nuevo.codigo, nuevo.apellido, nuevo.nombre, nuevo.edad, nuevo.altura, nuevo.peso, nuevo.presion, nuevo.IMC, output);
     }
     fclose(archivoP);
 }
@@ -43,7 +45,7 @@ int encontrarDatos(char *archivo, char *codigo)
     char codigoEncontrado[50];
     char nombre[50], apellido[50];
     int edad;
-    float altura, peso, presion;
+    float altura, peso, presion, IMC;
     char timestamp[128];
     FILE *archivoP;
     archivoP = fopen(archivo, "r");
@@ -58,7 +60,7 @@ int encontrarDatos(char *archivo, char *codigo)
         do
         {
             posicion = ftell(archivoP);
-            (num = fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%127[^\n]\n", codigoEncontrado, apellido, nombre, &edad, &altura, &peso, &presion, timestamp));
+            (num = fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%f;%127[^\n]\n", codigoEncontrado, apellido, nombre, &edad, &altura, &peso, &presion, &IMC, timestamp));
             if (strcmp(codigo, codigoEncontrado) == 0)
             {
                 break;
@@ -67,7 +69,7 @@ int encontrarDatos(char *archivo, char *codigo)
             {
                 posicion = -1;
             }
-        } while (num == 8);
+        } while (num == 9);
 
         fclose(archivoP);
     }
@@ -85,7 +87,7 @@ void mostrarDatos(char *archivo, int posicion)
     char codigoEncontrado[50];
     char nombre[50], apellido[50];
     int edad;
-    float altura, peso, presion;
+    float altura, peso, presion, IMC;
     char timestamp[128];
     FILE *archivoP;
     archivoP = fopen(archivo, "r");
@@ -96,8 +98,8 @@ void mostrarDatos(char *archivo, int posicion)
     else
     {
         fseek(archivoP, posicion, 0);
-        fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%127[^\n]\n", codigoEncontrado, apellido, nombre, &edad, &altura, &peso, &presion, timestamp);
-        printf("Los datos encontrados son:\n %s;%s;%s;%d;%.2f;%.2f;%.2f\n", codigoEncontrado, apellido, nombre, edad, altura, peso, presion);
+        fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%f;%127[^\n]\n", codigoEncontrado, apellido, nombre, &edad, &altura, &peso, &presion, &IMC, timestamp);
+        printf("Los datos encontrados son:\n %s;%s;%s;%d;%.2f;%.2f;%.2f;%.2f\n", codigoEncontrado, apellido, nombre, edad, altura, peso, presion, IMC);
     }
     fclose(archivoP);
 }
@@ -106,7 +108,7 @@ void reemplazarDatos(char *archivo, int posicion, struct paciente nuevo)
 {
     char codigo[20], apellido[50], nombre[50], timestamp[128];
     int edad;
-    float altura, peso, presion;
+    float altura, peso, presion, IMC;
     time_t tiempo = time(0);
     struct tm *tlocal = localtime(&tiempo);
     char output[128];
@@ -121,12 +123,15 @@ void reemplazarDatos(char *archivo, int posicion, struct paciente nuevo)
     {
         strftime(output, 128, "%d/%m/%y %H:%M:%S", tlocal);
         fseek(archivoP, posicion, 0);
-        fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%127[^\n]\n", codigo, apellido, nombre, &edad, &altura, &peso, &presion, timestamp);
+        fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%f;%127[^\n]\n", codigo, apellido, nombre, &edad, &altura, &peso, &presion, &IMC, timestamp);
         fseek(archivoP, posicion, 0);
-        fprintf(archivoP, "%s;%s;%s;%d;%.2f;%.2f;%.2f;%s", nuevo.codigo, nuevo.apellido, nuevo.nombre, nuevo.edad, nuevo.altura, nuevo.peso, nuevo.presion, output);
+        fprintf(archivoP, "%s;%s;%s;%d;%.2f;%.2f;%.2f;%.2f;%s", nuevo.codigo, nuevo.apellido, nuevo.nombre, nuevo.edad, nuevo.altura, nuevo.peso, nuevo.presion, nuevo.IMC, output);
     }
     fclose(archivoP);
 }
+
+// El resto del código se mantiene igual
+
 
 int main()
 {
@@ -173,6 +178,8 @@ int main()
                 scanf(" %f", &nuevo.presion);
                 fflush(stdin);
                 puts("\nDatos guardados\n");
+                nuevo.IMC = (nuevo.peso / pow(nuevo.altura, 2));
+                printf("El indice de masa corporal es %.2f\n", nuevo.IMC);
                 ingresoDatos(nombreArchivo, nuevo);
 
                 puts("Desea ingresar otro paciente\n1.Si\n2.No");
