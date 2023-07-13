@@ -104,7 +104,6 @@ void mostrarDatos(char *archivo, int posicion)
     fclose(archivoP);
 }
 
-
 void reemplazarDatos(char *archivo, int posicion, struct paciente nuevo)
 {
     char codigo[20], apellido[50], nombre[50], presion[50], timestamp[128];
@@ -131,7 +130,7 @@ void reemplazarDatos(char *archivo, int posicion, struct paciente nuevo)
     fclose(archivoP);
 }
 
-
+// funcion principal
 int main()
 {
     char codigo[50];
@@ -147,7 +146,11 @@ int main()
         puts("1. Ingresar nuevo paciente\n");
         puts("2. Encontrar paciente\n");
         puts("3. Salir\n");
-        scanf("%d", &menu);
+        if (scanf("%d", &menu) != 1)
+        {
+            menu = 4;
+        }
+
         fflush(stdin);
 
         switch (menu)
@@ -237,15 +240,18 @@ int main()
                     puts("1. Regresar al menu principal");
                     puts("2. Buscar otro paciente");
                     puts("3. Editar datos de paciente");
-                    scanf("%d", &menu2);
+                    if (scanf("%d", &menu2)!= 1)
+                    {
+                        menu2 = 4;
+                    }
 
-                    while (menu2 != 1 && menu2!= 2 && menu2!=3)
-                {
-                    puts("Esa no es una opcion valida");
-                    scanf("%d", &menu2);
-                    fflush(stdin);
-                }
-                
+                    while (menu2 != 1 && menu2 != 2 && menu2 != 3)
+                    {
+                        puts("Esa no es una opcion valida");
+                        scanf("%d", &menu2);
+                        fflush(stdin);
+                    }
+
                     if (menu2 == 3)
                     {
                         puts("Ingrese los nuevos datos:\n");
@@ -312,7 +318,7 @@ int main()
         case 3:
             break;
         default:
-            printf("Lo siento, esa no es una opcion\n");
+            printf("\nLo siento, esa no es una opcion\n");
             break;
         }
 
