@@ -13,7 +13,7 @@ struct paciente
     int edad;
     float altura;
     float peso;
-    float presion;
+    char presion[50];
     float IMC;
 };
 
@@ -33,7 +33,7 @@ void ingresoDatos(char *archivo, struct paciente nuevo)
     else
     {
         strftime(output, 128, "%d/%m/%y %H:%M:%S", tlocal);
-        fprintf(archivoP, "%s;%s;%s;%d;%.2f;%.2f;%.2f;%.2f;%s\n", nuevo.codigo, nuevo.apellido, nuevo.nombre, nuevo.edad, nuevo.altura, nuevo.peso, nuevo.presion, nuevo.IMC, output);
+        fprintf(archivoP, "%s;%s;%s;%d;%.2f;%.2f;%s;%.2f;%s   \n", nuevo.codigo, nuevo.apellido, nuevo.nombre, nuevo.edad, nuevo.altura, nuevo.peso, nuevo.presion, nuevo.IMC, output);
     }
     fclose(archivoP);
 }
@@ -45,8 +45,8 @@ int encontrarDatos(char *archivo, char *codigo)
     char codigoEncontrado[50];
     char nombre[50], apellido[50];
     int edad;
-    float altura, peso, presion, IMC;
-    char timestamp[128];
+    float altura, peso, IMC;
+    char presion[50], timestamp[128];
     FILE *archivoP;
     archivoP = fopen(archivo, "r");
     if (archivoP == NULL)
@@ -60,7 +60,7 @@ int encontrarDatos(char *archivo, char *codigo)
         do
         {
             posicion = ftell(archivoP);
-            (num = fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%f;%127[^\n]\n", codigoEncontrado, apellido, nombre, &edad, &altura, &peso, &presion, &IMC, timestamp));
+            num = fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%[^;];%f;%127[^\n]\n", codigoEncontrado, apellido, nombre, &edad, &altura, &peso, presion, &IMC, timestamp);
             if (strcmp(codigo, codigoEncontrado) == 0)
             {
                 break;
@@ -87,8 +87,8 @@ void mostrarDatos(char *archivo, int posicion)
     char codigoEncontrado[50];
     char nombre[50], apellido[50];
     int edad;
-    float altura, peso, presion, IMC;
-    char timestamp[128];
+    float altura, peso, IMC;
+    char presion[50], timestamp[128];
     FILE *archivoP;
     archivoP = fopen(archivo, "r");
     if (archivoP == NULL)
@@ -98,20 +98,21 @@ void mostrarDatos(char *archivo, int posicion)
     else
     {
         fseek(archivoP, posicion, 0);
-        fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%f;%127[^\n]\n", codigoEncontrado, apellido, nombre, &edad, &altura, &peso, &presion, &IMC, timestamp);
-        printf("Los datos encontrados son:\n %s;%s;%s;%d;%.2f;%.2f;%.2f;%.2f\n", codigoEncontrado, apellido, nombre, edad, altura, peso, presion, IMC);
+        fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%[^;];%f;%127[^\n]\n", codigoEncontrado, apellido, nombre, &edad, &altura, &peso, presion, &IMC, timestamp);
+        printf("Los datos encontrados son:\n %s;%s;%s;%d;%.2f;%.2f;%s;%.2f\n", codigoEncontrado, apellido, nombre, edad, altura, peso, presion, IMC);
     }
     fclose(archivoP);
 }
 
+
 void reemplazarDatos(char *archivo, int posicion, struct paciente nuevo)
 {
-    char codigo[20], apellido[50], nombre[50], timestamp[128];
+    char codigo[20], apellido[50], nombre[50], presion[50], timestamp[128];
     int edad;
-    float altura, peso, presion, IMC;
+    float altura, peso, IMC;
+    char output[128];
     time_t tiempo = time(0);
     struct tm *tlocal = localtime(&tiempo);
-    char output[128];
     FILE *archivoP;
     archivoP = fopen(archivo, "r+");
     if (archivoP == NULL)
@@ -123,20 +124,18 @@ void reemplazarDatos(char *archivo, int posicion, struct paciente nuevo)
     {
         strftime(output, 128, "%d/%m/%y %H:%M:%S", tlocal);
         fseek(archivoP, posicion, 0);
-        fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%f;%f;%127[^\n]\n", codigo, apellido, nombre, &edad, &altura, &peso, &presion, &IMC, timestamp);
+        fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%[^;];%f;%127[^\n]\n", codigo, apellido, nombre, &edad, &altura, &peso, &presion, &IMC, timestamp);
         fseek(archivoP, posicion, 0);
-        fprintf(archivoP, "%s;%s;%s;%d;%.2f;%.2f;%.2f;%.2f;%s", nuevo.codigo, nuevo.apellido, nuevo.nombre, nuevo.edad, nuevo.altura, nuevo.peso, nuevo.presion, nuevo.IMC, output);
+        fprintf(archivoP, "%s;%s;%s;%d;%.2f;%.2f;%s;%.2f;%s", nuevo.codigo, nuevo.apellido, nuevo.nombre, nuevo.edad, nuevo.altura, nuevo.peso, nuevo.presion, nuevo.IMC, output);
     }
     fclose(archivoP);
 }
-
-// El resto del código se mantiene igual
 
 
 int main()
 {
     char codigo[50];
-    int menu, menu1, menu2, posicion;
+    int menu, menu1, menu2, posicion, validar;
     struct paciente nuevo;
     char nombreArchivo[40] = "Registros medicos.txt";
 
@@ -144,7 +143,7 @@ int main()
 
     do
     {
-        puts("\nElija una de las siguientes opciones:\n");
+        puts("\nElija una de las siguientes opciones escribiendo el numero de la opcion correspondiente:\n");
         puts("1. Ingresar nuevo paciente\n");
         puts("2. Encontrar paciente\n");
         puts("3. Salir\n");
@@ -165,22 +164,52 @@ int main()
                 puts("\nNombre:");
                 scanf("%s", nuevo.nombre);
                 fflush(stdin);
+
                 puts("\nEdad:");
-                scanf("%d", &nuevo.edad);
-                fflush(stdin);
-                puts("\nAltura:");
-                scanf("%f", &nuevo.altura);
-                fflush(stdin);
-                puts("\nPeso:");
-                scanf("%f", &nuevo.peso);
-                fflush(stdin);
+
+                do
+                {
+                    validar = scanf("%d", &nuevo.edad);
+                    fflush(stdin);
+                    if (nuevo.edad > 130 || nuevo.edad < 0 || validar != 1)
+                    {
+                        puts("Ingrese un numero valido\n");
+                    }
+
+                } while (nuevo.edad > 130 || nuevo.edad < 0 || validar != 1);
+
+                puts("\nAltura(m):");
+                do
+                {
+                    validar = scanf("%f", &nuevo.altura);
+                    fflush(stdin);
+                    if (nuevo.altura > 2.51 || nuevo.altura < 0.30 || validar != 1)
+                    {
+                        puts("Ingrese un numero valido:\n");
+                    }
+
+                } while (nuevo.altura > 2.51 || nuevo.altura < 0.30 || validar != 1);
+
+                puts("\nPeso(kg):");
+                do
+                {
+                    validar = scanf("%f", &nuevo.peso);
+                    fflush(stdin);
+                    if (nuevo.peso > 440 || nuevo.peso < 2 || validar != 1)
+                    {
+                        puts("Ingrese un numero valido:\n");
+                    }
+
+                } while (nuevo.peso > 440 || nuevo.peso < 2 || validar != 1);
+
                 puts("\nPresion:");
-                scanf(" %f", &nuevo.presion);
+                scanf(" %s", &nuevo.presion);
                 fflush(stdin);
-                puts("\nDatos guardados\n");
+
                 nuevo.IMC = (nuevo.peso / pow(nuevo.altura, 2));
                 printf("El indice de masa corporal es %.2f\n", nuevo.IMC);
                 ingresoDatos(nombreArchivo, nuevo);
+                puts("\nDatos guardados\n");
 
                 puts("Desea ingresar otro paciente\n1.Si\n2.No");
                 scanf("%d", &menu1);
@@ -209,6 +238,14 @@ int main()
                     puts("2. Buscar otro paciente");
                     puts("3. Editar datos de paciente");
                     scanf("%d", &menu2);
+
+                    while (menu2 != 1 && menu2!= 2 && menu2!=3)
+                {
+                    puts("Esa no es una opcion valida");
+                    scanf("%d", &menu2);
+                    fflush(stdin);
+                }
+                
                     if (menu2 == 3)
                     {
                         puts("Ingrese los nuevos datos:\n");
@@ -221,17 +258,48 @@ int main()
                         scanf("%s", nuevo.nombre);
                         fflush(stdin);
                         puts("\nEdad:");
-                        scanf("%d", &nuevo.edad);
-                        fflush(stdin);
-                        puts("\nAltura:");
-                        scanf("%f", &nuevo.altura);
-                        fflush(stdin);
-                        puts("\nPeso:");
-                        scanf("%f", &nuevo.peso);
-                        fflush(stdin);
+
+                        do
+                        {
+                            validar = scanf("%d", &nuevo.edad);
+                            fflush(stdin);
+                            if (nuevo.edad > 130 || nuevo.edad < 0 || validar != 1)
+                            {
+                                puts("Ingrese un numero valido\n");
+                            }
+
+                        } while (nuevo.edad > 130 || nuevo.edad < 0 || validar != 1);
+
+                        puts("\nAltura(m):");
+                        do
+                        {
+                            validar = scanf("%f", &nuevo.altura);
+                            fflush(stdin);
+                            if (nuevo.altura > 2.51 || nuevo.altura < 0.30 || validar != 1)
+                            {
+                                puts("Ingrese un numero valido:\n");
+                            }
+
+                        } while (nuevo.altura > 2.51 || nuevo.altura < 0.30 || validar != 1);
+
+                        puts("\nPeso(kg):");
+                        do
+                        {
+                            validar = scanf("%f", &nuevo.peso);
+                            fflush(stdin);
+                            if (nuevo.peso > 440 || nuevo.peso < 2 || validar != 1)
+                            {
+                                puts("Ingrese un numero valido:\n");
+                            }
+
+                        } while (nuevo.peso > 440 || nuevo.peso < 2 || validar != 1);
+
                         puts("\nPresion:");
-                        scanf(" %f", &nuevo.presion);
+                        scanf(" %s", &nuevo.presion);
                         fflush(stdin);
+
+                        nuevo.IMC = (nuevo.peso / pow(nuevo.altura, 2));
+                        printf("El indice de masa corporal es %.2f\n", nuevo.IMC);
                         puts("\nDatos guardados\n");
 
                         reemplazarDatos(nombreArchivo, posicion, nuevo);
