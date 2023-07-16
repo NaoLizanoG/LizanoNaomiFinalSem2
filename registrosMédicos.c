@@ -122,7 +122,7 @@ void mostrarDatos(char *archivo, int posicion)
         // fseek ubica el puntero en la fila de los datos coincidentes para mostrarlos en pantalla
         fseek(archivoP, posicion, 0);
         fscanf(archivoP, "%[^;];%[^;];%[^;];%d;%f;%f;%[^;];%f;%127[^\n]\n", codigoEncontrado, apellido, nombre, &edad, &altura, &peso, presion, &IMC, timestamp);
-        printf("Los datos encontrados son:\n %s;%s;%s;%d;%.2f;%.2f;%s;%.2f\n", codigoEncontrado, apellido, nombre, edad, altura, peso, presion, IMC);
+        printf("Los datos encontrados son:\n Codigo: %s\n Apellido:%s\n Nombre:%s\n Edad:%d\n Altura:%.2f\n Peso:%.2f\n Presion:%s\n IMC:%.2f\n", codigoEncontrado, apellido, nombre, edad, altura, peso, presion, IMC);
     }
     fclose(archivoP);
 }
